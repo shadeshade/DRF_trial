@@ -20,7 +20,7 @@ class Post(models.Model):
 
 
 class LastRequest(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='requested_at')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='requested_at')
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

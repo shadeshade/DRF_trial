@@ -63,7 +63,7 @@ class LastRequestSerializer(serializers.ModelSerializer):
 
 
 class UserActivitySerializer(serializers.ModelSerializer):
-    last_request = LastRequestSerializer(source='requested_at', many=True)
+    last_request = LastRequestSerializer(source='requested_at')
 
     class Meta:
         model = User

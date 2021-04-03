@@ -1,5 +1,4 @@
-from datetime import datetime
-
+from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -9,23 +8,16 @@ from .models import User, Post, LastRequest
 
 
 def save_activity(user):
-    # try:
-    #     obj = LastRequest.objects.get(user=user)
-    # except LastRequest.DoesNotExist:
-    #     obj = LastRequest.objects.create(user=user)
-    # obj.__dict__.update(date=datetime.now())
-    # obj.save()
-
-    obj, created = LastRequest.objects.update_or_create(user=user)
+    obj, created = LastRequest.objects.get_or_create(user=user)
     if not created:
-        obj.__dict__.update(date=datetime.now())
+        obj.date = timezone.now()
+        # obj.__dict__.update(date=datetime.now())
         obj.save()
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserActivitySerializer
-
     permission_classes = [AllowAny]
 
     # filter_backends = [SearchFilter]
