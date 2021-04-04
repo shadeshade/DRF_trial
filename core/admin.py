@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from core.models import Post
+from core.models import Post, Like
 
 admin.site.register(Post)
-
+admin.site.register(Like)

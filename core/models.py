@@ -6,8 +6,9 @@ class Post(models.Model):
     author = models.ForeignKey(User, blank=False, related_name='posts', on_delete=models.CASCADE)
     text = models.CharField(max_length=500)
     date_posted = models.DateTimeField(auto_now_add=True)
-    liked_by = models.ManyToManyField(User, blank=True, related_name="liked")
-    disliked_by = models.ManyToManyField(User, blank=True, related_name="disliked")
+    # liked_by = models.ManyToManyField(User, blank=True, related_name='liked')
+
+    # disliked_by = models.ManyToManyField(User, blank=True, related_name="disliked")
 
     def __str__(self):
         if len(str(self.text)) > 10:
@@ -25,3 +26,9 @@ class LastRequest(models.Model):
 
     def __str__(self):
         return str(self.user) + ': ' + str(self.date)
+
+
+class Like(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
+    liked_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_likes')
+    created_at = models.DateTimeField(auto_now_add=True)

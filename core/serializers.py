@@ -1,6 +1,7 @@
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
-from core.models import User, Post, LastRequest
+from core.models import User, Post, LastRequest, Like
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -16,50 +17,46 @@ class UserSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = '__all__'
+        fields = ('text',)
+
+    def create(self, validated_data):
+        validated_data = {**validated_data, 'author': self.context['request'].user}
+        return super(PostSerializer, self).create(validated_data)
 
 
 class PostLikeSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+
     class Meta:
         model = Post
-        like_status = serializers.CharField(max_length=8)
         fields = ('id',)
 
     def save(self, request, **kwargs):
-        post_id = self.initial_data['id']
-        like_status = self.initial_data['like_status']
+        post_id = self.validated_data['id']
         post = Post.objects.get(id=post_id)
         user = request.user
-        liked_by_user = user.liked.all()
-        disliked_by_user = user.disliked.all()
-        if like_status == 'liked':
-            if post in liked_by_user:
-                post.liked_by.remove(user)
-            elif post in disliked_by_user:
-                post.disliked_by.remove(user)
-                post.liked_by.add(user)
-            else:
-                post.liked_by.add(user)
-        elif like_status == 'disliked':
-            if post in liked_by_user:
-                post.liked_by.remove(user)
-                post.disliked_by.add(user)
-            elif post in disliked_by_user:
-                post.disliked_by.remove(user)
-            else:
-                post.disliked_by.add(user)
+        like, created = Like.objects.get_or_create(post=post, liked_by=user)
+        if not created:
+            like.delete()
 
-    def validate(self, *args, **kwargs):
-        like_status = self.initial_data['like_status']
-        if like_status not in ['liked', 'disliked']:
-            raise serializers.ValidationError("Value must be equal 'liked' or 'disliked'")
-        return like_status
+    def validate_id(self, value):
+        try:
+            Post.objects.get(id=value)
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError('Post with such id doesn\'t exist')
+        return value
+
+    # def validate(self, *args, **kwargs):
+    #     like_status = self.initial_data['like_status']
+    #     if like_status not in ['liked', 'disliked']:
+    #         raise serializers.ValidationError("Value must be equal 'liked' or 'disliked'")
+    #     return like_status
 
 
 class LastRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = LastRequest
-        fields = '__all__'
+        fields = ('date',)
 
 
 class UserActivitySerializer(serializers.ModelSerializer):
@@ -67,6 +64,15 @@ class UserActivitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        # last_request = ''
-        fields = '__all__'
-        # fields = ('id', 'last_login', )
+        fields = ('id', 'last_login', 'last_request')
+
+
+class LikeAnalyticsSerializer(serializers.ModelSerializer):
+    # total = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Like
+        fields = ('id', 'created_at', 'post', 'liked_by')
+
+    def get_total(self, obj):
+        return self.instance.count()
