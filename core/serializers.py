@@ -20,7 +20,9 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ('text',)
 
     def create(self, validated_data):
-        validated_data = {**validated_data, 'author': self.context['request'].user}
+        user = self.context['request'].user
+        LastRequest.save_activity(user)
+        validated_data = {**validated_data, 'author': user}
         return super(PostSerializer, self).create(validated_data)
 
 
@@ -32,9 +34,10 @@ class PostLikeSerializer(serializers.ModelSerializer):
         fields = ('id',)
 
     def save(self, request, **kwargs):
+        user = request.user
+        LastRequest.save_activity(user)
         post_id = self.validated_data['id']
         post = Post.objects.get(id=post_id)
-        user = request.user
         like, created = Like.objects.get_or_create(post=post, liked_by=user)
         if not created:
             like.delete()
@@ -45,12 +48,6 @@ class PostLikeSerializer(serializers.ModelSerializer):
         except ObjectDoesNotExist:
             raise serializers.ValidationError('Post with such id doesn\'t exist')
         return value
-
-    # def validate(self, *args, **kwargs):
-    #     like_status = self.initial_data['like_status']
-    #     if like_status not in ['liked', 'disliked']:
-    #         raise serializers.ValidationError("Value must be equal 'liked' or 'disliked'")
-    #     return like_status
 
 
 class LastRequestSerializer(serializers.ModelSerializer):
@@ -68,11 +65,7 @@ class UserActivitySerializer(serializers.ModelSerializer):
 
 
 class LikeAnalyticsSerializer(serializers.ModelSerializer):
-    # total = serializers.SerializerMethodField()
 
     class Meta:
         model = Like
         fields = ('id', 'created_at', 'post', 'liked_by')
-
-    def get_total(self, obj):
-        return self.instance.count()
