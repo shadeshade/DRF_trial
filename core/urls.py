@@ -11,4 +11,5 @@ urlpatterns = [
     path('posts/create/', views.PostViewSet.as_view({'post': 'create'})),
 
     path('analytics/', views.LikeViewSet.as_view({'get': 'list'})),
+
 ]
