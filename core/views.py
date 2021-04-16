@@ -1,14 +1,10 @@
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import update_last_login
 from django.db.models import Count
 from django.db.models.functions import TruncDay
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 from core.serializers import LikePostSerializer, CreatePostSerializer, UserActivitySerializer, \
     ViewPostSerializer, LikeAnalyticsArgsSerializer
@@ -75,19 +71,3 @@ class AnalyticsViewSet(ListAPIView):
         response.data['total_likes'] = total_likes
         return response
 
-
-class CustomTokenObtainPairView(TokenObtainPairView):
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-
-        try:
-            serializer.is_valid(raise_exception=True)
-        except TokenError as e:
-            raise InvalidToken(e.args[0])
-
-        currentUserModel = get_user_model()
-        user = currentUserModel.objects.get(username=request.data['username'])
-        update_last_login(None, user)
-
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)

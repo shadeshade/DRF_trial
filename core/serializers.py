@@ -1,7 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
-from core.models import User, Post, LastRequest, Like
+from core.models import User, Post, Like
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -24,7 +24,6 @@ class CreatePostSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.context['request'].user
-        LastRequest.save_activity(user)
         validated_data = {**validated_data, 'author': user}
         return super(CreatePostSerializer, self).create(validated_data)
 
@@ -57,7 +56,6 @@ class LikePostSerializer(serializers.ModelSerializer):
         is_unlike_request = self.UNLIKE_PATH_STR in request.path
 
         user = request.user
-        LastRequest.save_activity(user)
         post_id = self.validated_data['id']
         post = Post.objects.get(id=post_id)
 
