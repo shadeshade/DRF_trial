@@ -16,12 +16,12 @@ $ curl -X POST http://127.0.0.1:8000/api/v1/posts/ -H 'Authorization: Bearer eyJ
 ```
 Post like:      
 ```
-$ curl -X POST http://127.0.0.1:8000/api/v1/posts/<int:pk>/like/ -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
+$ curl -X POST http://127.0.0.1:8000/api/v1/posts/1/like/ -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
 {}
 ```
 Post unlike:
 ```
-$ curl -X POST http://127.0.0.1:8000/api/v1/posts/<int:pk>/unlike/ -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
+$ curl -X POST http://127.0.0.1:8000/api/v1/posts/1/unlike/ -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
 {}
 ```
 Posts list:
@@ -44,7 +44,7 @@ $ curl -X GET http://127.0.0.1:8000/api/v1/posts/ -H 'Authorization: Bearer eyJ0
     }
 ]
 ```
-Analytics about how many likes was made:
+Analytics about how many likes were made:
 ```
 $ curl -X GET -G http://127.0.0.1:8000/api/v1/analytics/ -d date_from=2021-04-13 -d date_to=2021-05-16 -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...'
 {
