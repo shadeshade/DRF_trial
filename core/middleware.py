@@ -28,7 +28,6 @@ class CustomMiddleware(object):
         """
         Called just after the view has finished executing.
         """
-        user_id = request.user.id
-        if user_id:
-            LastRequest.save_activity(request.user.id)
+        if not request.user.is_anonymous:
+            LastRequest.save_activity(request.user)
         return response
